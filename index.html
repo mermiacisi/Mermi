@@ -82,70 +82,94 @@
 </style>
 </head>
 <body><div class="container">
-  <h1>Atış Mesafesi & Açısı Hesaplayıcı</h1><label for="kisaKenar">Kısa Kenar (cm):</label> <input type="number" id="kisaKenar" min="0" step="0.01" placeholder="Örnek: 0.4" />
+  <h1>Atış Mesafesi & Açısı Hesaplayıcı</h1><label for="silah">Silah Türü:</label> <select id="silah" onchange="togglePompalıAlan()"> <option value="tabanca">Tabanca</option> <option value="pompalı">Pompalı Tüfek</option> <option value="kales">Kaleşnikof</option> </select>
 
-<label for="uzunKenar">Uzun Kenar (cm):</label> <input type="number" id="uzunKenar" min="0" step="0.01" placeholder="Örnek: 0.8" />
+  <div id="elipsAlanlari">
+    <label for="kisaKenar">Kısa Kenar (cm):</label>
+    <input type="number" id="kisaKenar" min="0" step="0.01" placeholder="Örnek: 0.4" /><label for="uzunKenar">Uzun Kenar (cm):</label>
+<input type="number" id="uzunKenar" min="0" step="0.01" placeholder="Örnek: 0.8" />
 
-<label for="yukseklik">İsabet Noktasının Yerden Yüksekliği (metre):</label> <input type="number" id="yukseklik" min="0" step="0.01" placeholder="Örnek: 1.5" />
-
-<label for="silah">Silah Türü:</label> <select id="silah"> <option value="tabanca">Tabanca</option> <option value="pompalı">Pompalı Tüfek</option> <option value="kales">Kaleşnikof</option> </select>
+  </div>  <div id="pompalıAlan" style="display:none;">
+    <label for="sacmaCap">Saçma Dağılım Çapı (cm):</label>
+    <input type="number" id="sacmaCap" min="0" step="0.1" placeholder="Örnek: 30" />
+  </div><label for="yukseklik">İsabet Noktasının Yerden Yüksekliği (metre):</label> <input type="number" id="yukseklik" min="0" step="0.01" placeholder="Örnek: 1.5" />
 
 <button onclick="hesapla()">Hesapla</button>
 
   <div class="result" id="sonuc" style="display:none;"></div>  <div class="explanation">
-    <p><strong>Açıklama:</strong> Kısa ve uzun kenar ölçüleri, merminin hedef yüzeye çarptığı açıyı belirlemek için kullanılır. Bu açı, merminin yatay düzleme göre eğimini verir.</p>
-    <p>Buradan bulunan açı ve yerden yüksekliğe göre yaklaşık atış mesafesi hesaplanır. Silah türüne göre farklı toleranslarla yorum yapılır.</p>
+    <p><strong>Açıklama:</strong> Tabanca ve kaleşnikof için kısa ve uzun kenar ölçüleriyle geliş açısı ve atış mesafesi tahmini yapılır. Pompalı tüfek için saçma çapına göre mesafe belirlenir.</p>
     <p><strong>Not:</strong> Bu hesaplamalar tahmini olup, çevresel faktörler (rüzgar, mermi tipi, hız vb.) hesaba katılmaz.</p>
   </div>
 </div><script>
-  function hesapla() {
-    const kisa = parseFloat(document.getElementById('kisaKenar').value);
-    const uzun = parseFloat(document.getElementById('uzunKenar').value);
-    const yukseklik = parseFloat(document.getElementById('yukseklik').value);
+  function togglePompalıAlan() {
     const silah = document.getElementById('silah').value;
-    const sonucDiv = document.getElementById('sonuc');
+    const pompalıAlan = document.getElementById('pompalıAlan');
+    const elipsAlanlari = document.getElementById('elipsAlanlari');
 
-    if (isNaN(kisa) || isNaN(uzun) || isNaN(yukseklik) || kisa <= 0 || uzun <= 0 || yukseklik <= 0) {
-      alert('Lütfen pozitif ve geçerli değerler girin.');
-      sonucDiv.style.display = 'none';
-      return;
-    }
-    if(kisa > uzun) {
-      alert('Kısa kenar, uzun kenardan büyük olamaz.');
-      sonucDiv.style.display = 'none';
-      return;
-    }
-
-    let oran = kisa / uzun;
-    if (oran > 1) oran = 1;
-    const aciRad = Math.asin(oran);
-    const aciDerece = (aciRad * 180 / Math.PI).toFixed(2);
-
-    let mesafe = yukseklik / Math.tan(aciRad);
-    if (!isFinite(mesafe) || mesafe < 0) {
-      sonucDiv.style.display = 'none';
-      alert('Hesaplanan mesafe geçersiz, girdileri kontrol edin.');
-      return;
-    }
-
-    let ekYorum = '';
     if (silah === 'pompalı') {
-      if (mesafe > 50) ekYorum = 'Bu mesafe pompalı için olağandışı uzun olabilir.';
-      else if (mesafe < 5) ekYorum = 'Pompalı için çok kısa mesafe olabilir (aşırı yayılma olmalı).';
-      else ekYorum = 'Pompalı tüfek için mesafe makul görünüyor.';
-    } else if (silah === 'tabanca') {
-      if (mesafe > 100) ekYorum = 'Bu mesafe tabanca için aşırı uzun olabilir.';
-      else ekYorum = 'Tabanca için tipik bir mesafe aralığında.';
-    } else if (silah === 'kales') {
-      ekYorum = 'Kaleşnikof gibi uzun namlulu silahlar için mesafe uygundur.';
+      pompalıAlan.style.display = 'block';
+      elipsAlanlari.style.display = 'none';
+    } else {
+      pompalıAlan.style.display = 'none';
+      elipsAlanlari.style.display = 'block';
+    }
+  }
+
+  function hesapla() {
+    const silah = document.getElementById('silah').value;
+    const hedefYukseklik = parseFloat(document.getElementById('yukseklik').value);
+    const sonucDiv = document.getElementById('sonuc');
+    const atisYuksekligi = 1.4;
+
+    let mesafe = 0;
+    let aciDerece = null;
+    let yorum = '';
+
+    if (isNaN(hedefYukseklik) || hedefYukseklik <= 0) {
+      alert('Geçerli yükseklik girin.');
+      return;
     }
 
-    mesafe = mesafe.toFixed(2);
+    if (silah === 'pompalı') {
+      const sacmaCap = parseFloat(document.getElementById('sacmaCap').value);
+      if (isNaN(sacmaCap) || sacmaCap <= 0) {
+        alert('Saçma çapını girin.');
+        return;
+      }
+      mesafe = sacmaCap / 2.8;
+      yorum = 'Pompalı için saçma dağılımına göre mesafe hesaplandı.';
+    } else {
+      const kisa = parseFloat(document.getElementById('kisaKenar').value);
+      const uzun = parseFloat(document.getElementById('uzunKenar').value);
+      if (isNaN(kisa) || isNaN(uzun) || kisa <= 0 || uzun <= 0 || kisa > uzun) {
+        alert('Elips değerlerini düzgün girin.');
+        return;
+      }
+      const oran = kisa / uzun;
+      const aciRad = Math.asin(Math.min(oran, 1));
+      aciDerece = (aciRad * 180 / Math.PI).toFixed(2);
+      const fark = atisYuksekligi - hedefYukseklik;
+
+      mesafe = fark / Math.tan(aciRad);
+
+      if (silah === 'tabanca') {
+        yorum = mesafe > 100 ? 'Tabanca için mesafe uzun olabilir.' : 'Tabanca için makul mesafe.';
+      } else if (silah === 'kales') {
+        if (aciRad < 0.2) mesafe *= 1.2; // düz atış düzeltmesi
+        yorum = 'Kaleşnikof için uygun aralık.';
+      }
+    }
+
+    if (!isFinite(mesafe) || mesafe < 0) {
+      alert('Geçersiz sonuç.');
+      return;
+    }
+
     sonucDiv.style.display = 'block';
     sonucDiv.innerHTML = `
-      <p>Atış Açısı: <strong>${aciDerece}°</strong></p>
-      <p>Tahmini Atış Mesafesi: <strong>${mesafe} metre</strong></p>
-      <p>${ekYorum}</p>
+      ${aciDerece ? `<p>Atış Açısı: <strong>${aciDerece}°</strong></p>` : ''}
+      <p>Tahmini Mesafe: <strong>${mesafe.toFixed(2)} metre</strong></p>
+      <p>${yorum}</p>
     `;
   }
 </script></body>
