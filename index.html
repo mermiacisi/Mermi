@@ -1,27 +1,252 @@
-<label for="mermiTipi">Mermi Tipi:</label>
-<select id="mermiTipi" onchange="mermiTipiSecildi()">
-  <option value="">Seçiniz</option>
-  <option value="9mm">9 mm (BC: 0.12, Hız: 360 m/s)</option>
-  <option value="45acp">.45 ACP (BC: 0.17, Hız: 260 m/s)</option>
-  <option value="12ga">12 GA Saçma (BC: 0.05, Hız: 400 m/s)</option>
-</select>
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Atış Noktası ve Balistik Hesaplayıcı</title>
+<style>
+  body {
+    font-family: 'Open Sans', sans-serif;
+    margin: 0; padding: 0;
+    background: linear-gradient(to right, #2c3e50 0%, #34495e 100%);
+    color: #ecf0f1;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 40px 20px;
+  }
+  .container {
+    background: rgba(44, 62, 80, 0.95);
+    border-radius: 15px;
+    padding: 30px;
+    max-width: 900px;
+    width: 100%;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+  }
+  h1, h2 {
+    font-family: 'Montserrat', sans-serif;
+    margin-bottom: 20px;
+  }
+  h1 { color: #3498db; font-size: 2.5em; border-bottom: 3px solid #e74c3c; padding-bottom: 10px; }
+  h2 { color: #2ecc71; font-size: 1.8em; margin-top: 35px; }
+  label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #f4f4f4;
+  }
+  input[type="number"], select, textarea {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    border: 1px solid #7f8c8d;
+    background-color: #3b5066;
+    color: #ecf0f1;
+    font-size: 1em;
+    box-sizing: border-box;
+  }
+  textarea { resize: vertical; }
+  button {
+    background-color: #e74c3c;
+    color: white;
+    padding: 14px 28px;
+    font-weight: 700;
+    font-size: 1.2em;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    display: block;
+    margin: 25px auto;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    transition: background-color 0.3s ease, transform 0.2s ease;
+  }
+  button:hover {
+    background-color: #c0392b;
+    transform: translateY(-2px);
+  }
+  .result {
+    background-color: #2c3e50;
+    border-left: 6px solid #3498db;
+    border-radius: 10px;
+    padding: 25px;
+    color: #ecf0f1;
+    font-size: 1.1em;
+    text-align: left;
+  }
+  .note {
+    margin-top: 35px;
+    background-color: #34495e;
+    padding: 18px;
+    border-radius: 10px;
+    border: 1px dashed #f39c12;
+    color: #bdc3c7;
+  }
+  /* Zemin profili alanı */
+  #egimProfiliDiv {
+    border: 1px dashed #3498db;
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    background-color: rgba(52, 152, 219, 0.1);
+  }
+  .egim-entry {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .egim-entry select, .egim-entry input {
+    flex: 1;
+    min-width: 100px;
+    margin-bottom: 0;
+  }
+  .egim-entry button {
+    background-color: #e67e22;
+    padding: 8px 15px;
+    font-size: 0.9em;
+    margin: 0;
+    min-width: 80px;
+  }
+  .egim-entry button:hover {
+    background-color: #d35400;
+  }
+  #addEgimButton {
+    background-color: #2ecc71;
+    margin-top: 10px;
+  }
+  #addEgimButton:hover {
+    background-color: #27ae60;
+  }
+  @media (max-width: 768px) {
+    .egim-entry {
+      flex-direction: column;
+      gap: 5px;
+    }
+    .egim-entry select, .egim-entry input {
+      width: 100%;
+      min-width: unset;
+    }
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+    <h1>Atış Noktası ve Balistik Hesaplayıcı</h1>
+    <p>Mermi isabet elipsi, yükseklik ve zemin eğimi verilerini kullanarak atıcının konumunu ve atış mesafesini belirleyin. Pompalı ve tabanca için doğru hesaplama içerir.</p>
 
-<label for="mermiHizi">Mermi Çıkış Hızı (m/s):</label>
-<input type="number" id="mermiHizi" step="1" placeholder="Örn: 360">
+    <h2>Giriş Bilgileri</h2>
 
-<label for="ballistikKatsayi">Ballistik Katsayı (BC):</label>
-<input type="number" id="ballistikKatsayi" step="0.01" placeholder="Örn: 0.12">
+    <label for="isabetYuksekligi">Merminin Hedefte Çarptığı Yerden Yükseklik (metre):</label>
+    <input type="number" id="isabetYuksekligi" value="12.5" step="0.1" placeholder="Örn: 12.5">
 
-<button onclick="hesaplaBalistik()">Balistik Hesapla</button>
+    <label for="kisaEksen">İsabet Elipsinin Kısa Eksen Uzunluğu (cm):</label>
+    <input type="number" id="kisaEksen" value="0.4" step="0.01" placeholder="Örn: 0.4">
 
-<div id="balistikSonuc"></div>
+    <label for="uzunEksen">İsabet Elipsinin Uzun Eksen Uzunluğu (cm):</label>
+    <input type="number" id="uzunEksen" value="0.8" step="0.01" placeholder="Örn: 0.8">
+
+    <label for="gelenYon">Merminin Geldiği Genel Yön (açıklama):</label>
+    <textarea id="gelenYon" rows="2" placeholder="Örn: Binanın güney cephesinden geliyor."></textarea>
+
+    <h2>Zemin Profili</h2>
+    <div id="egimProfiliDiv">
+      <button id="addEgimButton" onclick="addEgimEntry()">+ Zemin Kesiti Ekle</button>
+    </div>
+
+    <label for="aticininYuksekligi">Atıcının (Namlunun) Yerden Yüksekliği (metre):</label>
+    <input type="number" id="aticininYuksekligi" value="1.6" step="0.1" placeholder="Örn: 1.6">
+
+    <label for="ikiBinaArasiMesafe">İki Bina Arası Mesafe (m, atış iki bina arasındaysa):</label>
+    <input type="number" id="ikiBinaArasiMesafe" value="0" step="0.1" placeholder="Örn: 10">
+
+    <h2>Balistik Parametreler</h2>
+
+    <label for="mermiTipi">Mermi Tipi:</label>
+    <select id="mermiTipi" onchange="mermiTipiSecildi()">
+      <option value="">Seçiniz</option>
+      <option value="9mm">9 mm (BC: 0.12, Hız: 360 m/s)</option>
+      <option value="45acp">.45 ACP (BC: 0.17, Hız: 260 m/s)</option>
+      <option value="12ga">12 GA Saçma (BC: 0.05, Hız: 400 m/s)</option>
+    </select>
+
+    <label for="mermiHizi">Mermi Çıkış Hızı (m/s):</label>
+    <input type="number" id="mermiHizi" step="1" placeholder="Örn: 360">
+
+    <label for="ballistikKatsayi">Ballistik Katsayı (BC):</label>
+    <input type="number" id="ballistikKatsayi" step="0.01" placeholder="Örn: 0.12">
+
+    <button onclick="hesapla()">ATIŞ NOKTASINI VE BALİSTİK HESABI YAP</button>
+
+    <div class="result" id="sonuclar">
+      <h2>Analiz Sonuçları</h2>
+      <p>Girdiğiniz bilgilerle hesaplama yapıldıktan sonra sonuçlar burada görünecek.</p>
+    </div>
+
+    <div class="note">
+      <strong>Önemli Notlar:</strong>
+      <ul>
+        <li>Hesaplamalar tahmini sonuçlar verir, kesin adli analiz değildir.</li>
+        <li>Ballistik katsayı ve mermi hızı gerçek verilerle girilmelidir.</li>
+        <li>Zemin eğimi ve diğer çevresel faktörler hesaplama doğruluğunu etkiler.</li>
+      </ul>
+    </div>
+  </div>
 
 <script>
+  // Zemin profili yönetimi
+  let egimEntryCounter = 0;
+  function addEgimEntry(initialData = null) {
+    egimEntryCounter++;
+    const egimProfiliDiv = document.getElementById('egimProfiliDiv');
+    const newEntryDiv = document.createElement('div');
+    newEntryDiv.className = 'egim-entry';
+    newEntryDiv.id = `egimEntry_${egimEntryCounter}`;
+    newEntryDiv.innerHTML = `
+      <label>Kesit ${egimEntryCounter} Tipi:</label>
+      <select id="egimType_${egimEntryCounter}" onchange="toggleEgimDetails(${egimEntryCounter})">
+        <option value="düz" ${initialData && initialData.tip === 'düz' ? 'selected' : ''}>Düz Zemin</option>
+        <option value="eğimli" ${initialData && initialData.tip === 'eğimli' ? 'selected' : ''}>Eğimli Zemin</option>
+      </select>
+
+      <label>Uzunluk (m):</label>
+      <input type="number" id="egimLength_${egimEntryCounter}" value="${initialData ? initialData.uzunluk : '10'}" step="0.1" placeholder="Örn: 10">
+
+      <div id="egimDetails_${egimEntryCounter}" style="display: ${initialData && initialData.tip === 'eğimli' ? 'flex' : 'none'}; gap: 10px; flex: 2; align-items: center;">
+        <label>Eğim Açısı (°):</label>
+        <input type="number" id="egimAngle_${egimEntryCounter}" value="${initialData && initialData.egim_aci !== undefined ? initialData.egim_aci : '5'}" step="0.1" placeholder="Örn: 5">
+
+        <label>Yön:</label>
+        <select id="egimDirection_${egimEntryCounter}">
+          <option value="yukarı" ${initialData && initialData.yon === 'yukarı' ? 'selected' : ''}>Yokuş Yukarı</option>
+          <option value="aşağı" ${initialData && initialData.yon === 'aşağı' ? 'selected' : ''}>Yokuş Aşağı</option>
+        </select>
+      </div>
+
+      <button onclick="removeEgimEntry(${egimEntryCounter})">Kaldır</button>
+    `;
+    egimProfiliDiv.insertBefore(newEntryDiv, document.getElementById('addEgimButton'));
+    toggleEgimDetails(egimEntryCounter);
+  }
+  function removeEgimEntry(id) {
+    document.getElementById(`egimEntry_${id}`).remove();
+  }
+  function toggleEgimDetails(id) {
+    const type = document.getElementById(`egimType_${id}`).value;
+    const detailsDiv = document.getElementById(`egimDetails_${id}`);
+    detailsDiv.style.display = (type === 'eğimli') ? 'flex' : 'none';
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    addEgimEntry({ tip: 'düz', uzunluk: 50.0 });
+  });
+
+  // Mermi tipi seçildiğinde hız ve BC otomatik ayarla
   function mermiTipiSecildi() {
     const tip = document.getElementById('mermiTipi').value;
     const hizInput = document.getElementById('mermiHizi');
     const bcInput = document.getElementById('ballistikKatsayi');
-
     if(tip === '9mm') {
       hizInput.value = 360;
       bcInput.value = 0.12;
@@ -37,35 +262,81 @@
     }
   }
 
-  function hesaplaBalistik() {
+  // Hesaplama fonksiyonu
+  function hesapla() {
+    // Girdi al
+    const isabetYuksekligi = parseFloat(document.getElementById('isabetYuksekligi').value);
+    const kisaEksen = parseFloat(document.getElementById('kisaEksen').value);
+    const uzunEksen = parseFloat(document.getElementById('uzunEksen').value);
+    const gelenYon = document.getElementById('gelenYon').value;
+    const aticininYuksekligi = parseFloat(document.getElementById('aticininYuksekligi').value);
+    const ikiBinaArasiMesafe = parseFloat(document.getElementById('ikiBinaArasiMesafe').value);
     const hiz = parseFloat(document.getElementById('mermiHizi').value);
     const bc = parseFloat(document.getElementById('ballistikKatsayi').value);
 
-    if(isNaN(hiz) || isNaN(bc) || hiz <= 0 || bc <= 0) {
-      alert('Lütfen geçerli mermi hızı ve BC değeri girin.');
+    // Zemin profili oku
+    const egimProfilData = [];
+    for(let i=1; i<=egimEntryCounter; i++) {
+      const entryDiv = document.getElementById(`egimEntry_${i}`);
+      if(entryDiv) {
+        const tip = document.getElementById(`egimType_${i}`).value;
+        const uzunluk = parseFloat(document.getElementById(`egimLength_${i}`).value);
+        if(isNaN(uzunluk) || uzunluk <= 0) {
+          alert('Zemin kesit uzunlukları pozitif olmalı!');
+          return;
+        }
+        const entry = { tip, uzunluk };
+        if(tip === 'eğimli') {
+          const egim_aci = parseFloat(document.getElementById(`egimAngle_${i}`).value);
+          const yon = document.getElementById(`egimDirection_${i}`).value;
+          if(isNaN(egim_aci) || egim_aci < 0) {
+            alert('Eğim açısı pozitif olmalı!');
+            return;
+          }
+          entry.egim_aci = egim_aci;
+          entry.yon = yon;
+        }
+        egimProfilData.push(entry);
+      }
+    }
+
+    // Girdi kontrolleri
+    if(isNaN(isabetYuksekligi) || isNaN(kisaEksen) || isNaN(uzunEksen) || isNaN(aticininYuksekligi) ||
+       isNaN(hiz) || isNaN(bc) ||
+       kisaEksen <= 0 || uzunEksen <= 0 || kisaEksen > uzunEksen || isabetYuksekligi < 0 || aticininYuksekligi < 0 ||
+       egimProfilData.length === 0) {
+      document.getElementById('sonuclar').innerHTML = `
+        <h2 style="color:#e74c3c;">Hata!</h2>
+        <p>Lütfen tüm gerekli alanlara geçerli pozitif sayısal değerler girin.</p>`;
       return;
     }
 
-    // Basit düşüş ve mesafe tahmini (çok kabaca)
-    // Yer çekimi: 9.81 m/s²
-    // Hava direnci ve hız kaybı için basit katsayı: bc ile orantılı
+    // Mermi çarpma açısı hesapla
+    let carpisAcisiRadyan;
+    const oran = kisaEksen / uzunEksen;
+    if(oran > 0.999999) {
+      carpisAcisiRadyan = Math.PI / 2;
+    } else {
+      carpisAcisiRadyan = Math.asin(oran);
+    }
+    const carpisAcisiDerece = carpisAcisiRadyan * (180/Math.PI);
 
-    // Örnek mesafe (m)
-    const mesafe = 50; // bunu kullanıcıdan da alabiliriz
+    // Zemin yüksekliği hesabı
+    let mevcutZeminYuksekligi = 0;
+    let toplamMesafe = 0;
+    let maxMesafeKontrol = 500;
+    let hassasiyet = 0.01;
+    let mesafeBulundu = false;
+    let atisMesafesiYatay = 0;
 
-    // Hız kaybı tahmini: hız azalır ama çok basit model
-    const hizSon = hiz * Math.exp(-0.0001 * bc * mesafe);
+    // Mermi yolundaki zemin profilini hesapla
+    for(let d=hassasiyet; d<=maxMesafeKontrol; d+=hassasiyet){
+      let simZeminYuksekligi = 0;
+      let kalanMesafe = d;
 
-    // Düşüş (y) = 0.5 * g * (t^2), t = mesafe / ortalama hız
-    const ortalamaHiz = (hiz + hizSon) / 2;
-    const zaman = mesafe / ortalamaHiz;
+      for(const kesit of egimProfilData){
+        if(kalanMesafe <= 0) break;
 
-    const dusus = 0.5 * 9.81 * (zaman ** 2);
-
-    document.getElementById('balistikSonuc').innerHTML = `
-      <p><strong>Atış Mesafesi:</strong> ${mesafe} m</p>
-      <p><strong>Son Hız (Tahmini):</strong> ${hizSon.toFixed(2)} m/s</p>
-      <p><strong>Yaklaşık Mermi Düşüşü:</strong> ${dusus.toFixed(2)} m</p>
-    `;
-  }
-</script>
+        if(kalanMesafe >= kesit.uzunluk){
+          if(kesit.tip === 'eğimli'){
+            let egimRadyan = kesit.eg
