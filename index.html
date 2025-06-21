@@ -1,141 +1,71 @@
-<!DOCTYPE html><html lang="tr">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Balistik Mesafe Hesaplama</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-      background: linear-gradient(to right, #1e3c72, #2a5298); /* Mavi degrade */
-      color: #f4f4f4;
-    }
-    .container {
-      max-width: 800px;
-      margin: 50px auto;
-      background-color: rgba(0, 0, 0, 0.3);
-      padding: 30px;
-      border-radius: 10px;
-    }
-    h1, h2 {
-      text-align: center;
-    }
-    label {
-      display: block;
-      margin-top: 20px;
-      font-weight: bold;
-    }
-    input[type="number"], select {
-      width: 100%;
-      padding: 10px;
-      margin-top: 5px;
-      border-radius: 5px;
-      border: none;
-      font-size: 1em;
-    }
-    button {
-      margin-top: 30px;
-      background-color: #e74c3c;
-      color: white;
-      padding: 12px;
-      border: none;
-      border-radius: 5px;
-      width: 100%;
-      font-size: 1.2em;
-      cursor: pointer;
-    }
-    .result {
-      margin-top: 30px;
-      background-color: rgba(255, 255, 255, 0.1);
-      padding: 20px;
-      border-radius: 8px;
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <h1>Balistik Mesafe Hesaplama</h1><label for="tur">Silah Türü Seçin:</label>
-<select id="tur">
-  <option value="tabanca">Tabanca / Slug</option>
-  <option value="sacma">Pompalı (Saçma)</option>
+<label for="mermiTipi">Mermi Tipi:</label>
+<select id="mermiTipi" onchange="mermiTipiSecildi()">
+  <option value="">Seçiniz</option>
+  <option value="9mm">9 mm (BC: 0.12, Hız: 360 m/s)</option>
+  <option value="45acp">.45 ACP (BC: 0.17, Hız: 260 m/s)</option>
+  <option value="12ga">12 GA Saçma (BC: 0.05, Hız: 400 m/s)</option>
 </select>
 
-<div id="tabancaInput">
-  <label for="kisa">Kısa Eksen (cm)</label>
-  <input type="number" id="kisa" placeholder="Örn: 0.4" step="0.01" />
+<label for="mermiHizi">Mermi Çıkış Hızı (m/s):</label>
+<input type="number" id="mermiHizi" step="1" placeholder="Örn: 360">
 
-  <label for="uzun">Uzun Eksen (cm)</label>
-  <input type="number" id="uzun" placeholder="Örn: 0.8" step="0.01" />
+<label for="ballistikKatsayi">Ballistik Katsayı (BC):</label>
+<input type="number" id="ballistikKatsayi" step="0.01" placeholder="Örn: 0.12">
 
-  <label for="isabet">Hedefteki Yükseklik (m)</label>
-  <input type="number" id="isabet" placeholder="Örn: 12.5" step="0.1" />
+<button onclick="hesaplaBalistik()">Balistik Hesapla</button>
 
-  <label for="namlu">Atıcının Yüksekliği (m)</label>
-  <input type="number" id="namlu" placeholder="Örn: 1.6" step="0.1" />
-</div>
+<div id="balistikSonuc"></div>
 
-<div id="sacmaInput" style="display: none;">
-  <label for="cap">Saçma Yayılma Çapı (cm)</label>
-  <input type="number" id="cap" placeholder="Örn: 100 (1 metre yayılma)" />
-</div>
+<script>
+  function mermiTipiSecildi() {
+    const tip = document.getElementById('mermiTipi').value;
+    const hizInput = document.getElementById('mermiHizi');
+    const bcInput = document.getElementById('ballistikKatsayi');
 
-<button onclick="hesapla()">HESAPLA</button>
-
-<div class="result" id="sonuc"></div>
-
-  </div>  <script>
-    const turSec = document.getElementById('tur');
-    const tabancaDiv = document.getElementById('tabancaInput');
-    const sacmaDiv = document.getElementById('sacmaInput');
-
-    turSec.addEventListener('change', () => {
-      if (turSec.value === 'tabanca') {
-        tabancaDiv.style.display = 'block';
-        sacmaDiv.style.display = 'none';
-      } else {
-        tabancaDiv.style.display = 'none';
-        sacmaDiv.style.display = 'block';
-      }
-    });
-
-    function hesapla() {
-      const tur = turSec.value;
-      const sonucDiv = document.getElementById('sonuc');
-
-      if (tur === 'tabanca') {
-        const kisa = parseFloat(document.getElementById('kisa').value);
-        const uzun = parseFloat(document.getElementById('uzun').value);
-        const isabet = parseFloat(document.getElementById('isabet').value);
-        const namlu = parseFloat(document.getElementById('namlu').value);
-
-        if (!kisa || !uzun || !isabet || !namlu || kisa > uzun) {
-          sonucDiv.innerHTML = '<p>Lütfen geçerli tüm verileri girin. Kısa eksen uzun eksenden büyük olamaz.</p>';
-          return;
-        }
-
-        const oran = kisa / uzun;
-        const aciRad = Math.asin(oran);
-        const aciDeg = (aciRad * 180) / Math.PI;
-        const mesafe = Math.abs((isabet - namlu) / Math.tan(aciRad));
-
-        sonucDiv.innerHTML = `<h2>Sonuçlar</h2>
-          <p><strong>Çarpma Açısı:</strong> ${aciDeg.toFixed(1)}°</p>
-          <p><strong>Tahmini Yatay Mesafe:</strong> ${mesafe.toFixed(2)} metre</p>`;
-
-      } else {
-        const cap = parseFloat(document.getElementById('cap').value);
-        if (!cap || cap <= 0) {
-          sonucDiv.innerHTML = '<p>Lütfen saçma yayılma çapını (cm) girin.</p>';
-          return;
-        }
-
-        // Deneysel formül: saçmalar 1 m'de ~10 cm yayılır
-        const mesafe = cap / 10;
-        sonucDiv.innerHTML = `<h2>Sonuçlar</h2>
-          <p><strong>Tahmini Mesafe:</strong> ${mesafe.toFixed(1)} metre</p>
-          <p>Not: Bu değer saçma çapına göre yaklaşık bir tahmindir.</p>`;
-      }
+    if(tip === '9mm') {
+      hizInput.value = 360;
+      bcInput.value = 0.12;
+    } else if(tip === '45acp') {
+      hizInput.value = 260;
+      bcInput.value = 0.17;
+    } else if(tip === '12ga') {
+      hizInput.value = 400;
+      bcInput.value = 0.05;
+    } else {
+      hizInput.value = '';
+      bcInput.value = '';
     }
-  </script></body>
-</html>
+  }
+
+  function hesaplaBalistik() {
+    const hiz = parseFloat(document.getElementById('mermiHizi').value);
+    const bc = parseFloat(document.getElementById('ballistikKatsayi').value);
+
+    if(isNaN(hiz) || isNaN(bc) || hiz <= 0 || bc <= 0) {
+      alert('Lütfen geçerli mermi hızı ve BC değeri girin.');
+      return;
+    }
+
+    // Basit düşüş ve mesafe tahmini (çok kabaca)
+    // Yer çekimi: 9.81 m/s²
+    // Hava direnci ve hız kaybı için basit katsayı: bc ile orantılı
+
+    // Örnek mesafe (m)
+    const mesafe = 50; // bunu kullanıcıdan da alabiliriz
+
+    // Hız kaybı tahmini: hız azalır ama çok basit model
+    const hizSon = hiz * Math.exp(-0.0001 * bc * mesafe);
+
+    // Düşüş (y) = 0.5 * g * (t^2), t = mesafe / ortalama hız
+    const ortalamaHiz = (hiz + hizSon) / 2;
+    const zaman = mesafe / ortalamaHiz;
+
+    const dusus = 0.5 * 9.81 * (zaman ** 2);
+
+    document.getElementById('balistikSonuc').innerHTML = `
+      <p><strong>Atış Mesafesi:</strong> ${mesafe} m</p>
+      <p><strong>Son Hız (Tahmini):</strong> ${hizSon.toFixed(2)} m/s</p>
+      <p><strong>Yaklaşık Mermi Düşüşü:</strong> ${dusus.toFixed(2)} m</p>
+    `;
+  }
+</script>
