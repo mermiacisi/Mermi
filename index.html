@@ -1,183 +1,143 @@
-<!DOCTYPE html><html lang="tr">
+<!DOCTYPE html>
+<html lang="tr">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Atış Mesafesi & Açısı Hesaplayıcı</title>
-<style>
-  body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #6a11cb, #2575fc);
-    color: #f0f0f0;
-    margin: 0;
-    min-height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    padding: 30px 15px;
-  }
-  .container {
-    background: rgba(0,0,0,0.75);
-    padding: 30px 40px;
-    border-radius: 12px;
-    max-width: 450px;
-    width: 100%;
-    box-shadow: 0 8px 30px rgba(0,0,0,0.6);
-  }
-  h1 {
-    text-align: center;
-    margin-bottom: 20px;
-    color: #f5a623;
-  }
-  label {
-    display: block;
-    margin-top: 15px;
-    font-weight: 600;
-    color: #ffd966;
-  }
-  input[type="number"], select {
-    width: 100%;
-    padding: 10px 12px;
-    margin-top: 6px;
-    border-radius: 8px;
-    border: none;
-    font-size: 1em;
-    background: #333;
-    color: #f0f0f0;
-  }
-  button {
-    margin-top: 25px;
-    width: 100%;
-    background-color: #f5a623;
-    border: none;
-    padding: 14px;
-    font-size: 1.1em;
-    font-weight: 700;
-    border-radius: 8px;
-    cursor: pointer;
-    color: #222;
-    transition: background-color 0.3s ease;
-  }
-  button:hover {
-    background-color: #d18e00;
-  }
-  .result {
-    margin-top: 30px;
-    background-color: #333;
-    padding: 20px;
-    border-radius: 10px;
-    color: #a6dcef;
-    font-weight: 700;
-    font-size: 1.15em;
-  }
-  .explanation {
-    margin-top: 25px;
-    background-color: #222;
-    padding: 15px;
-    border-radius: 10px;
-    font-size: 0.9em;
-    color: #ccc;
-    line-height: 1.5;
-  }
-  .explanation strong {
-    color: #f5a623;
-  }
-  .hidden { display: none; }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Atış Mesafesi Hesaplayıcı</title>
+  <style>
+    body {
+      background: linear-gradient(135deg, #2c3e50, #4ca1af);
+      font-family: Arial, sans-serif;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      padding: 30px 15px;
+      margin: 0;
+    }
+    .container {
+      background: rgba(0,0,0,0.7);
+      padding: 25px 30px;
+      border-radius: 12px;
+      max-width: 500px;
+      width: 100%;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    }
+    h1 {
+      text-align: center;
+      color: #f5a623;
+      margin-bottom: 20px;
+    }
+    label {
+      font-weight: bold;
+      margin-top: 15px;
+      display: block;
+      color: #ffd966;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: none;
+      font-size: 1em;
+      margin-top: 6px;
+      background: #333;
+      color: #fff;
+    }
+    button {
+      margin-top: 25px;
+      width: 100%;
+      background: #f5a623;
+      color: #222;
+      border: none;
+      padding: 14px;
+      border-radius: 8px;
+      font-size: 1.1em;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #d18e00;
+    }
+    .result {
+      margin-top: 25px;
+      background: #222;
+      padding: 20px;
+      border-radius: 10px;
+      font-size: 1.1em;
+      line-height: 1.5;
+      color: #a6dcef;
+    }
+  </style>
 </head>
 <body>
-<div class="container">
-  <h1>Atış Mesafesi & Açısı Hesaplayıcı</h1><label for="silah">Silah Türü:</label> <select id="silah"> <option value="tabanca" selected>Tabanca</option> <option value="pompalı">Pompalı Tüfek</option> <option value="kales">Kaleşnikof</option> </select>
+  <div class="container">
+    <h1>Atış Mesafesi Hesaplayıcı</h1>
 
-  <div id="elipsAlanlari">
-    <label for="kisaKenar">Kısa Kenar (cm):</label>
-    <input type="number" id="kisaKenar" min="0" step="0.01" placeholder="Örnek: 0.4" />
-    <label for="uzunKenar">Uzun Kenar (cm):</label>
-    <input type="number" id="uzunKenar" min="0" step="0.01" placeholder="Örnek: 0.8" />
-  </div>  <div id="pompalıAlan" class="hidden">
-    <label for="sacmaCap">Saçma Dağılım Çapı (cm):</label>
-    <input type="number" id="sacmaCap" min="0" step="0.1" placeholder="Örnek: 30" />
-  </div><label for="yukseklik">İsabet Noktasının Yerden Yüksekliği (metre):</label> <input type="number" id="yukseklik" min="0" step="0.01" placeholder="Örnek: 1.5" />
+    <label for="shortAxis">Kısa Kenar (mm):</label>
+    <input type="number" id="shortAxis" placeholder="Varsa girin, yoksa boş bırakın">
 
-<button id="hesapla">Hesapla</button>
+    <label for="longAxis">Uzun Kenar (mm):</label>
+    <input type="number" id="longAxis" placeholder="Varsa girin, yoksa boş bırakın">
 
-  <div class="result hidden" id="sonuc"></div>
-  <div class="explanation">
-    <p><strong>Açıklama:</strong> Tabanca ve Kaleşnikof için elips ölçülerinden otomatik açı ve mesafe hesaplanır. Pompalı için saçma çapına göre mesafe hesaplanır; elips ölçüsü girilirse ikincil yöntem olarak açı/tan(θ) kullanılır.</p>
-    <p><strong>Not:</strong> Hesaplamalar tahmini olup, çevresel koşullar hesaba katılmaz.</p>
+    <label for="angle">Giriş Açısı (°):</label>
+    <input type="number" id="angle" placeholder="Elips yoksa buraya girin">
+
+    <label for="height">İsabet Yüksekliği (cm):</label>
+    <input type="number" id="height" placeholder="Zeminden yüksekliği cm olarak girin">
+
+    <button onclick="hesapla()">Hesapla</button>
+
+    <div class="result" id="result"></div>
   </div>
-</div>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  const elipsAlanlari = document.getElementById('elipsAlanlari');
-  const pompalıAlan = document.getElementById('pompalıAlan');
-  const silahSec = document.getElementById('silah');
-  const sonucDiv = document.getElementById('sonuc');function toggleFields() { const silah = silahSec.value; if (silah === 'pompalı') { pompalıAlan.classList.remove('hidden'); elipsAlanlari.classList.add('hidden'); } else { pompalıAlan.classList.add('hidden'); elipsAlanlari.classList.remove('hidden'); } sonucDiv.classList.add('hidden'); }
 
-silahSec.addEventListener('change', toggleFields); toggleFields();
+  <script>
+    function hesapla() {
+      const shortAxis = parseFloat(document.getElementById('shortAxis').value);
+      const longAxis = parseFloat(document.getElementById('longAxis').value);
+      const angleInput = parseFloat(document.getElementById('angle').value);
+      const heightCm = parseFloat(document.getElementById('height').value);
+      const resultDiv = document.getElementById('result');
+      resultDiv.innerHTML = "";
 
-document.getElementById('hesapla').addEventListener('click', function() { const silah = silahSec.value; const atisYuk = 1.4; const hedefY = parseFloat(document.getElementById('yukseklik').value); let mesafe, aciDeger, yorum = '';
+      let angleDeg = null;
 
-if (isNaN(hedefY) || hedefY <= 0) {
-  sonucDiv.textContent = 'Geçerli bir hedef yüksekliği giriniz.';
-  sonucDiv.classList.remove('hidden');
-  return;
-}
+      if (!isNaN(shortAxis) && !isNaN(longAxis) && shortAxis > 0 && longAxis > 0 && shortAxis <= longAxis) {
+        let oran = shortAxis / longAxis;
+        angleDeg = Math.asin(Math.min(1, oran)) * 180 / Math.PI;
+      } else if (!isNaN(angleInput) && angleInput > 0 && angleInput < 90) {
+        angleDeg = angleInput;
+      } else {
+        resultDiv.innerHTML = "Geçerli bir açı ya da elips oranı girin.";
+        return;
+      }
 
-if (silah === 'pompalı') {
-  const cap = parseFloat(document.getElementById('sacmaCap').value);
-  if (!isNaN(cap) && cap > 0) {
-    mesafe = cap / 2.8;
-    yorum = 'Pompalı (saçma çapı yöntemi) mesafe hesabı.';
-  } else {
-    const kisa = parseFloat(document.getElementById('kisaKenar').value);
-    const uzun = parseFloat(document.getElementById('uzunKenar').value);
-    if (isNaN(kisa)||isNaN(uzun)||kisa<=0||uzun<=0||kisa>uzun) {
-      sonucDiv.textContent = 'Elips değerlerini kontrol edin.';
-      sonucDiv.classList.remove('hidden'); return;
+      if (isNaN(heightCm) || heightCm <= 0) {
+        resultDiv.innerHTML = "İsabet yüksekliği (zeminden cm) geçerli değil.";
+        return;
+      }
+
+      let angleRad = angleDeg * Math.PI / 180;
+      let h = heightCm / 100; // metre
+      let mesafe = h / Math.tan(angleRad);
+
+      // Uyarılar ve sınırlar
+      let yorum = "";
+      if (angleDeg < 5) yorum = "Uyarı: Açı çok düşük, sonuç güvenilir olmayabilir.";
+      if (angleDeg > 85) yorum = "Uyarı: Açı çok dik, sonuç yakın çıkabilir.";
+      if (mesafe < 0.5) {
+        yorum += " Minimum 0.5 m olarak sabitlendi.";
+        mesafe = 0.5;
+      }
+
+      resultDiv.innerHTML = `
+        <p><strong>Giriş Açısı:</strong> ${angleDeg.toFixed(2)}°</p>
+        <p><strong>İsabet Zeminden Yüksekliği:</strong> ${heightCm} cm</p>
+        <p><strong>Tahmini Yatay Mesafe:</strong> ${mesafe.toFixed(2)} m</p>
+        <p>${yorum}</p>
+      `;
     }
-    const oran = kisa/uzun;
-    const aciR = Math.asin(Math.min(oran,1));
-    aciDeger = (aciR*180/Math.PI).toFixed(2);
-    const fark = atisYuk - hedefY;
-    if (fark<=0) { sonucDiv.textContent = 'İsabet yüksekliği, namlu yüksekliğinden fazla olamaz.'; sonucDiv.classList.remove('hidden'); return; }
-    const tanV = Math.tan(aciR);
-    if (tanV<0.001) { sonucDiv.textContent = 'Açı çok düz, sonuç güvenilmez.'; sonucDiv.classList.remove('hidden'); return; }
-    mesafe = fark/tanV;
-    yorum = 'Pompalı (elips/tanθ yöntemi) mesafe hesabı.';
-  }
-} else {
-  const kisa = parseFloat(document.getElementById('kisaKenar').value);
-  const uzun = parseFloat(document.getElementById('uzunKenar').value);
-  if (isNaN(kisa)||isNaN(uzun)||kisa<=0||uzun<=0||kisa>uzun) {
-    sonucDiv.textContent = 'Elips değerlerini kontrol edin.';
-    sonucDiv.classList.remove('hidden'); return;
-  }
-  const oran = kisa/uzun;
-  const aciR = Math.asin(Math.min(oran,1));
-  aciDeger = (aciR*180/Math.PI).toFixed(2);
-  const fark = atisYuk - hedefY;
-  if (fark<=0) { sonucDiv.textContent = 'İsabet yüksekliği, namlu yüksekliğinden fazla olamaz.'; sonucDiv.classList.remove('hidden'); return; }
-  const tanV = Math.tan(aciR);
-  if (tanV<0.001) { sonucDiv.textContent = 'Açı çok düz, sonuç güvenilmez.'; sonucDiv.classList.remove('hidden'); return; }
-  mesafe = fark/tanV;
-  if (silah === 'kales' && aciR<0.2) {
-    mesafe *= 1.2;
-    yorum = 'Kaleşnikof (düz açı düzeltmesi uygulandı).';
-  } else {
-    yorum = 'Elips/tanθ yöntemiyle mesafe hesabı.';
-  }
-}
-
-if (!isFinite(mesafe) || mesafe<0) {
-  sonucDiv.textContent = 'Geçersiz sonuç.';
-  sonucDiv.classList.remove('hidden'); return;
-}
-sonucDiv.innerHTML = `${aciDeger? `<p>Atış Açısı: <strong>${aciDeger}°</strong></p>`: ''}` +
-                     `<p>Tahmini Mesafe: <strong>${mesafe.toFixed(2)} m</strong></p>` +
-                     `<p>${yorum}</p>`;
-sonucDiv.classList.remove('hidden');
-
-}); }); </script>
-
+  </script>
 </body>
 </html>
