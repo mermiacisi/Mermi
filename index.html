@@ -3,251 +3,129 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Çoklu Silah Tipi Atış Hesaplayıcı</title>
+<title>Atış Mesafesi Tahmini</title>
 <style>
   body {
-    font-family: Arial, sans-serif;
-    background: #222831;
-    color: #eeeeee;
-    max-width: 700px;
-    margin: 30px auto;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #4a90e2, #50e3c2);
+    color: #222;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    margin: 0;
     padding: 20px;
-    border-radius: 10px;
+  }
+  .container {
+    background: rgba(255, 255, 255, 0.9);
+    padding: 30px 40px;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    max-width: 400px;
+    width: 100%;
   }
   h1 {
     text-align: center;
-    color: #00adb5;
+    color: #2c3e50;
+    margin-bottom: 25px;
   }
   label {
     display: block;
     margin-top: 15px;
-    font-weight: bold;
+    font-weight: 600;
+    color: #34495e;
   }
-  input, select {
+  input[type="number"], select {
     width: 100%;
-    padding: 8px;
-    margin-top: 5px;
-    border-radius: 5px;
-    border: none;
+    padding: 10px 12px;
+    margin-top: 6px;
+    border: 1.5px solid #2980b9;
+    border-radius: 8px;
     font-size: 1em;
+    box-sizing: border-box;
   }
   button {
     margin-top: 25px;
-    background-color: #00adb5;
-    border: none;
-    padding: 12px;
-    border-radius: 8px;
-    color: #222831;
-    font-weight: bold;
-    font-size: 1.2em;
-    cursor: pointer;
     width: 100%;
+    background-color: #2980b9;
+    color: white;
+    border: none;
+    padding: 14px;
+    font-size: 1.1em;
+    font-weight: 700;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.25s ease;
   }
   button:hover {
-    background-color: #008e94;
+    background-color: #1f5f8b;
   }
-  #results {
-    margin-top: 30px;
-    background: #393e46;
+  .result {
+    margin-top: 25px;
     padding: 20px;
+    background: #dff0d8;
     border-radius: 8px;
+    color: #3c763d;
+    font-weight: 700;
+    font-size: 1.2em;
+    text-align: center;
+    box-shadow: inset 0 0 10px #a6d785;
   }
 </style>
 </head>
 <body>
-  <h1>Silah Tipi Atış ve Yayılım Hesaplayıcı</h1>
 
-  <label for="silahTipi">Silah Tipi Seçiniz:</label>
-  <select id="silahTipi" onchange="silahTipiChanged()">
-    <option value="">-- Seçiniz --</option>
-    <option value="tabanca">Tabanca (Tek Mermi)</option>
-    <option value="pompalı">Pompalı (Saçma)</option>
-    <option value="uzunNamlulu">Uzun Namlulu (Kaleşnikof vb.)</option>
+<div class="container">
+  <h1>Atış Mesafesi Tahmini</h1>
+
+  <label for="kisaKenari">Kısa Kenar (cm):</label>
+  <input type="number" id="kisaKenari" min="0" step="0.1" placeholder="Örn: 30" />
+
+  <label for="uzunKenari">Uzun Kenar (cm):</label>
+  <input type="number" id="uzunKenari" min="0" step="0.1" placeholder="Örn: 60" />
+
+  <label for="silahTipi">Silah Tipi:</label>
+  <select id="silahTipi">
+    <option value="pompalı">Pompalı</option>
+    <option value="tabanca">Tabanca</option>
+    <option value="uzunNamlulu">Kaleşnikof / Uzun Namlulu</option>
   </select>
 
-  <div id="genelInputs" style="display:none;">
-    <label for="mesafe">Atış Mesafesi (metre):</label>
-    <input type="number" id="mesafe" min="1" step="0.1" placeholder="Örn: 10">
+  <button onclick="hesaplaMesafe()">Mesafeyi Hesapla</button>
 
-    <label for="atikYukseklik">Atıcı (Namlunun) Yerden Yüksekliği (m):</label>
-    <input type="number" id="atikYukseklik" min="0.5" step="0.1" value="1.5">
-
-    <label for="hedefYukseklik">Hedef Yerden Yükseklik (m):</label>
-    <input type="number" id="hedefYukseklik" min="0" step="0.1" value="1.6">
-  </div>
-
-  <div id="tabancaInputs" style="display:none;">
-    <label for="kisaEksen">İsabet Elipsinin Kısa Eksen Uzunluğu (cm):</label>
-    <input type="number" id="kisaEksen" step="0.01" placeholder="Örn: 0.4">
-
-    <label for="uzunEksen">İsabet Elipsinin Uzun Eksen Uzunluğu (cm):</label>
-    <input type="number" id="uzunEksen" step="0.01" placeholder="Örn: 0.8">
-
-    <label for="mermiHiziTabanca">Mermi Çıkış Hızı (m/s):</label>
-    <input type="number" id="mermiHiziTabanca" step="1" value="360">
-
-    <label for="ballistikKatsayiTabanca">Ballistik Katsayı (BC):</label>
-    <input type="number" id="ballistikKatsayiTabanca" step="0.01" value="0.12">
-  </div>
-
-  <div id="pompalıInputs" style="display:none;">
-    <label for="sacmaSayisi">Saçma Sayısı (adet):</label>
-    <input type="number" id="sacmaSayisi" min="1" step="1" value="9">
-
-    <label for="sacmaCapi">Saçma Çapı (mm):</label>
-    <input type="number" id="sacmaCapi" min="0.1" step="0.01" value="3.5">
-
-    <label for="sacmaCikisHizi">Saçma Çıkış Hızı (m/s):</label>
-    <input type="number" id="sacmaCikisHizi" min="100" step="1" value="380">
-
-    <label for="sacmaYayilimAcisi">Yayılım Açısı (derece, yaklaşık):</label>
-    <input type="number" id="sacmaYayilimAcisi" min="1" max="20" step="0.1" value="10">
-  </div>
-
-  <div id="uzunNamluluInputs" style="display:none;">
-    <label for="mermiHiziUzun">Mermi Çıkış Hızı (m/s):</label>
-    <input type="number" id="mermiHiziUzun" step="1" value="715">
-
-    <label for="ballistikKatsayiUzun">Ballistik Katsayı (BC):</label>
-    <input type="number" id="ballistikKatsayiUzun" step="0.01" value="0.25">
-
-    <label for="rüzgarHizi">Rüzgar Hızı (m/s, isteğe bağlı):</label>
-    <input type="number" id="ruzgarHizi" step="0.1" value="0">
-  </div>
-
-  <button onclick="hesapla()">HESAPLA</button>
-
-  <div id="results"></div>
+  <div class="result" id="sonucAlani" style="display:none;"></div>
+</div>
 
 <script>
-  function silahTipiChanged() {
+  function hesaplaMesafe() {
+    const kisa = parseFloat(document.getElementById('kisaKenari').value);
+    const uzun = parseFloat(document.getElementById('uzunKenari').value);
     const tip = document.getElementById('silahTipi').value;
-    document.getElementById('genelInputs').style.display = tip ? 'block' : 'none';
-    document.getElementById('tabancaInputs').style.display = tip === 'tabanca' ? 'block' : 'none';
-    document.getElementById('pompalıInputs').style.display = tip === 'pompalı' ? 'block' : 'none';
-    document.getElementById('uzunNamluluInputs').style.display = tip === 'uzunNamlulu' ? 'block' : 'none';
-  }
 
-  // Pompalı saçma yayılımı hesaplama (basit açı ve mesafeye göre yayılım çapı)
-  function pompalıSaçmaYayılım(mesafe, yayilimAci) {
-    // yayılımAci derece cinsinden, mesafe metre cinsinden
-    // Yayılım yarıçapı = mesafe * tan(yayilimAci / 2)
-    const yayilimYaricap = mesafe * Math.tan((yayilimAci/2) * Math.PI/180);
-    const yayilimCap = yayilimYaricap * 2; // çap cm cinsine çevirelim
-    return yayilimCap;
-  }
-
-  // Balistik hız kaybı ve düşüş hesabı (basitleştirilmiş formüller)
-  function balistikHizKaybi(hiz, bc, mesafe) {
-    // Basit hava sürtünme etkisi: hız mesafe ile lineer azalıyor gibi (gerçekten karmaşık)
-    // Hız kaybı = mesafe * bc * 0.5 (örnek katsayı)
-    let kayip = mesafe * bc * 0.5;
-    let yeniHiz = hiz - kayip;
-    if(yeniHiz < 0) yeniHiz = 0;
-    return yeniHiz;
-  }
-
-  function mermiDususMesafeBazli(mesafe, hiz, atikYukseklik, hedefYukseklik) {
-    // Basitleştirilmiş düşüş hesabı (gravitasyon ve hız)
-    // h = (1/2) g t^2, t = mesafe / hız
-    const g = 9.81;
-    const t = mesafe / hiz;
-    const dusus = 0.5 * g * t * t; // metre cinsinden düşüş
-    // Gerçek düşüş; atıcının namlu yüksekliği ile hedef yüksekliği farkına göre ayarlanabilir
-    const yukseklikFarki = atikYukseklik - hedefYukseklik;
-    const netDusus = dusus - yukseklikFarki; // negatifse mermi hedeften yukarı düşmüş
-    return netDusus;
-  }
-
-  function hesapla() {
-    const tip = document.getElementById('silahTipi').value;
-    if(!tip) {
-      alert('Lütfen silah tipi seçiniz!');
+    if(isNaN(kisa) || isNaN(uzun) || kisa <= 0 || uzun <= 0) {
+      alert('Lütfen geçerli ve pozitif kısa ve uzun kenar değerleri girin.');
+      return;
+    }
+    if(kisa > uzun) {
+      alert('Kısa kenar, uzun kenardan büyük olamaz.');
       return;
     }
 
-    const mesafe = parseFloat(document.getElementById('mesafe').value);
-    const atikYukseklik = parseFloat(document.getElementById('atikYukseklik').value);
-    const hedefYukseklik = parseFloat(document.getElementById('hedefYukseklik').value);
-    if(isNaN(mesafe) || mesafe <= 0) {
-      alert('Geçerli bir mesafe giriniz!');
-      return;
-    }
-    if(isNaN(atikYukseklik) || atikYukseklik <= 0) {
-      alert('Atıcının namlu yüksekliğini geçerli giriniz!');
-      return;
-    }
-    if(isNaN(hedefYukseklik) || hedefYukseklik < 0) {
-      alert('Hedef yüksekliğini geçerli giriniz!');
-      return;
-    }
+    // Silah tipine göre katsayılar (örnek, deneysel)
+    let katsayi = 0.15; // Pompalı varsayılan
 
-    let sonucMetni = '';
+    if(tip === 'tabanca') katsayi = 0.02;
+    else if(tip === 'uzunNamlulu') katsayi = 0.01;
 
-    if(tip === 'tabanca') {
-      const kisaEksen = parseFloat(document.getElementById('kisaEksen').value);
-      const uzunEksen = parseFloat(document.getElementById('uzunEksen').value);
-      const hiz = parseFloat(document.getElementById('mermiHiziTabanca').value);
-      const bc = parseFloat(document.getElementById('ballistikKatsayiTabanca').value);
-      if([kisaEksen, uzunEksen, hiz, bc].some(v => isNaN(v) || v <= 0)) {
-        alert('Tabanca için tüm değerleri geçerli giriniz!');
-        return;
-      }
+    const yayilimCap = Math.sqrt(kisa * uzun); // cm
+    const mesafeCm = yayilimCap / katsayi; // cm
+    const mesafeM = mesafeCm / 100; // metre
 
-      // İsabet elipsinden atıcının mermiyle yaptığı açı
-      let oran = kisaEksen / uzunEksen;
-      let aciRad = (oran > 0.999999) ? Math.PI/2 : Math.asin(oran);
-      let aciDerece = (aciRad * 180/Math.PI).toFixed(2);
-
-      // Hız kaybı ve düşüş
-      let yeniHiz = balistikHizKaybi(hiz, bc, mesafe).toFixed(2);
-      let dusus = mermiDususMesafeBazli(mesafe, yeniHiz, atikYukseklik, hedefYukseklik).toFixed(2);
-
-      sonucMetni += `<h3>Tabanca Atış Hesaplaması</h3>`;
-      sonucMetni += `<p>İsabet Elips Açısı: <b>${aciDerece}°</b></p>`;
-      sonucMetni += `<p>Mesafede Mermi Hızı: <b>${yeniHiz} m/s</b></p>`;
-      sonucMetni += `<p>Mermi Düşüşü (yükseklik farkı dikkate alınarak): <b>${dusus} metre</b></p>`;
-    }
-    else if(tip === 'pompalı') {
-      const sacmaSayisi = parseInt(document.getElementById('sacmaSayisi').value);
-      const sacmaCapi = parseFloat(document.getElementById('sacmaCapi').value);
-      const sacmaHizi = parseFloat(document.getElementById('sacmaCikisHizi').value);
-      const yayilimAci = parseFloat(document.getElementById('sacmaYayilimAcisi').value);
-      if([sacmaSayisi, sacmaCapi, sacmaHizi, yayilimAci].some(v => isNaN(v) || v <= 0)) {
-        alert('Pompalı için tüm değerleri geçerli giriniz!');
-        return;
-      }
-
-      const yayilimCm = pompalıSaçmaYayılım(mesafe, yayilimAci);
-      sonucMetni += `<h3>Pompalı Atış Hesaplaması</h3>`;
-      sonucMetni += `<p>Mesafede Saçma Yayılım Çapı (tahmini): <b>${yayilimCm.toFixed(2)} metre</b></p>`;
-      sonucMetni += `<p>Saçma Sayısı: <b>${sacmaSayisi}</b></p>`;
-      sonucMetni += `<p>Saçma Çapı: <b>${sacmaCapi} mm</b></p>`;
-      sonucMetni += `<p>Saçma Çıkış Hızı: <b>${sacmaHizi} m/s</b></p>`;
-    }
-    else if(tip === 'uzunNamlulu') {
-      const hiz = parseFloat(document.getElementById('mermiHiziUzun').value);
-      const bc = parseFloat(document.getElementById('ballistikKatsayiUzun').value);
-      const ruzgar = parseFloat(document.getElementById('ruzgarHizi').value) || 0;
-      if([hiz, bc].some(v => isNaN(v) || v <= 0)) {
-        alert('Uzun namlulu için hız ve BC geçerli olmalı!');
-        return;
-      }
-
-      let yeniHiz = balistikHizKaybi(hiz, bc, mesafe).toFixed(2);
-      let dusus = mermiDususMesafeBazli(mesafe, yeniHiz, atikYukseklik, hedefYukseklik).toFixed(2);
-
-      // Basit rüzgar etkisi: yanal sapma (mesafe * rüzgar hızı * 0.1)
-      let ruzgarSapma = (mesafe * ruzgar * 0.1).toFixed(2);
-
-      sonucMetni += `<h3>Uzun Namlulu Atış Hesaplaması (Kaleşnikof vb.)</h3>`;
-      sonucMetni += `<p>Mesafede Mermi Hızı: <b>${yeniHiz} m/s</b></p>`;
-      sonucMetni += `<p>Mermi Düşüşü: <b>${dusus} metre</b></p>`;
-      sonucMetni += `<p>Rüzgar Kaynaklı Yanal Sapma (tahmini): <b>${ruzgarSapma} metre</b></p>`;
-    }
-
-    document.getElementById('results').innerHTML = sonucMetni;
+    const sonucAlani = document.getElementById('sonucAlani');
+    sonucAlani.style.display = 'block';
+    sonucAlani.textContent = `Tahmini Atış Mesafesi: ${mesafeM.toFixed(2)} metre`;
   }
 </script>
+
 </body>
 </html>
