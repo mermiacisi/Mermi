@@ -1,143 +1,206 @@
-<!DOCTYPE html>
-<html lang="tr">
+<!DOCTYPE html><html lang="tr">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Atış Mesafesi Hesaplayıcı</title>
   <style>
     body {
-      background: linear-gradient(135deg, #2c3e50, #4ca1af);
-      font-family: Arial, sans-serif;
-      color: #fff;
+      font-family: 'Segoe UI', Tahoma, sans-serif;
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      color: #f0f0f0;
+      margin: 0;
+      padding: 30px 15px;
       display: flex;
       justify-content: center;
       align-items: flex-start;
       min-height: 100vh;
-      padding: 30px 15px;
-      margin: 0;
     }
     .container {
-      background: rgba(0,0,0,0.7);
+      background: rgba(0, 0, 0, 0.75);
       padding: 25px 30px;
       border-radius: 12px;
-      max-width: 500px;
+      max-width: 550px;
       width: 100%;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
     }
     h1 {
       text-align: center;
-      color: #f5a623;
+      color: #ffd700;
       margin-bottom: 20px;
     }
     label {
-      font-weight: bold;
-      margin-top: 15px;
       display: block;
-      color: #ffd966;
+      margin-top: 15px;
+      font-weight: bold;
+      color: #ffa;
     }
-    input {
+    input, select {
       width: 100%;
       padding: 10px;
+      margin-top: 5px;
       border-radius: 8px;
       border: none;
-      font-size: 1em;
-      margin-top: 6px;
       background: #333;
       color: #fff;
     }
     button {
       margin-top: 25px;
       width: 100%;
-      background: #f5a623;
-      color: #222;
+      background-color: #f5a623;
       border: none;
       padding: 14px;
-      border-radius: 8px;
       font-size: 1.1em;
       font-weight: bold;
+      border-radius: 8px;
       cursor: pointer;
+      color: #222;
     }
     button:hover {
-      background: #d18e00;
+      background-color: #d18e00;
     }
     .result {
       margin-top: 25px;
-      background: #222;
+      background-color: #222;
       padding: 20px;
       border-radius: 10px;
-      font-size: 1.1em;
-      line-height: 1.5;
       color: #a6dcef;
+      font-size: 1.1em;
+    }
+    canvas {
+      display: block;
+      margin: 20px auto;
+      background: #111;
+      border: 1px solid #555;
+      border-radius: 10px;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>Atış Mesafesi Hesaplayıcı</h1>
+    <h1>Atış Mesafesi Hesaplayıcı</h1><label for="silah">Silah Türü:</label>
+<select id="silah">
+  <option value="tabanca">Tabanca</option>
+  <option value="pompalı">Pompalı Tüfek</option>
+  <option value="kales">Kaleşnikof</option>
+</select>
 
-    <label for="shortAxis">Kısa Kenar (mm):</label>
-    <input type="number" id="shortAxis" placeholder="Varsa girin, yoksa boş bırakın">
+<div id="elipsInputs">
+  <label for="shortAxis">Kısa Kenar (mm):</label>
+  <input type="number" id="shortAxis" placeholder="Örn: 4">
 
-    <label for="longAxis">Uzun Kenar (mm):</label>
-    <input type="number" id="longAxis" placeholder="Varsa girin, yoksa boş bırakın">
+  <label for="longAxis">Uzun Kenar (mm):</label>
+  <input type="number" id="longAxis" placeholder="Örn: 8">
+</div>
 
-    <label for="angle">Giriş Açısı (°):</label>
-    <input type="number" id="angle" placeholder="Elips yoksa buraya girin">
+<div id="pompalıInput" style="display: none">
+  <label for="sacmaCap">Saçma Dağılım Çapı (cm):</label>
+  <input type="number" id="sacmaCap" placeholder="Örn: 30">
+</div>
 
-    <label for="height">İsabet Yüksekliği (cm):</label>
-    <input type="number" id="height" placeholder="Zeminden yüksekliği cm olarak girin">
+<label for="height">İsabet Yüksekliği (cm):</label>
+<input type="number" id="height" placeholder="Örn: 160">
 
-    <button onclick="hesapla()">Hesapla</button>
+<label for="direction">Giriş Yönü (isteğe bağlı):</label>
+<input type="text" id="direction" placeholder="Örn: Kuzeybatı">
 
-    <div class="result" id="result"></div>
-  </div>
+<button onclick="hesapla()">Hesapla</button>
 
-  <script>
-    function hesapla() {
-      const shortAxis = parseFloat(document.getElementById('shortAxis').value);
-      const longAxis = parseFloat(document.getElementById('longAxis').value);
-      const angleInput = parseFloat(document.getElementById('angle').value);
-      const heightCm = parseFloat(document.getElementById('height').value);
-      const resultDiv = document.getElementById('result');
-      resultDiv.innerHTML = "";
+<canvas id="grafik" width="300" height="200"></canvas>
+<div class="result" id="result"></div>
 
-      let angleDeg = null;
+  </div>  <script>
+    const silahSelect = document.getElementById('silah');
+    const elipsInputs = document.getElementById('elipsInputs');
+    const pompalıInput = document.getElementById('pompalıInput');
 
-      if (!isNaN(shortAxis) && !isNaN(longAxis) && shortAxis > 0 && longAxis > 0 && shortAxis <= longAxis) {
-        let oran = shortAxis / longAxis;
-        angleDeg = Math.asin(Math.min(1, oran)) * 180 / Math.PI;
-      } else if (!isNaN(angleInput) && angleInput > 0 && angleInput < 90) {
-        angleDeg = angleInput;
+    silahSelect.addEventListener('change', () => {
+      if (silahSelect.value === 'pompalı') {
+        pompalıInput.style.display = 'block';
+        elipsInputs.style.display = 'none';
       } else {
-        resultDiv.innerHTML = "Geçerli bir açı ya da elips oranı girin.";
-        return;
+        pompalıInput.style.display = 'none';
+        elipsInputs.style.display = 'block';
       }
+    });
+
+    function hesapla() {
+      const silah = silahSelect.value;
+      const resultDiv = document.getElementById('result');
+      const direction = document.getElementById('direction').value.trim();
+      const heightCm = parseFloat(document.getElementById('height').value);
+
+      let angleDeg, mesafe = null, yorum = "";
 
       if (isNaN(heightCm) || heightCm <= 0) {
-        resultDiv.innerHTML = "İsabet yüksekliği (zeminden cm) geçerli değil.";
+        resultDiv.innerHTML = "<strong>İsabet yüksekliği geçerli değil.</strong>";
         return;
       }
+      const heightM = heightCm / 100;
 
-      let angleRad = angleDeg * Math.PI / 180;
-      let h = heightCm / 100; // metre
-      let mesafe = h / Math.tan(angleRad);
+      if (silah === 'pompalı') {
+        const sacma = parseFloat(document.getElementById('sacmaCap').value);
+        if (isNaN(sacma) || sacma <= 0) {
+          resultDiv.innerHTML = "<strong>Geçerli saçma çapı giriniz.</strong>";
+          return;
+        }
+        mesafe = sacma / 2.8;
+        angleDeg = null;
+        yorum = "Pompalı saçma çapına göre yaklaşık mesafe.";
+      } else {
+        const shortAxis = parseFloat(document.getElementById('shortAxis').value);
+        const longAxis = parseFloat(document.getElementById('longAxis').value);
 
-      // Uyarılar ve sınırlar
-      let yorum = "";
-      if (angleDeg < 5) yorum = "Uyarı: Açı çok düşük, sonuç güvenilir olmayabilir.";
-      if (angleDeg > 85) yorum = "Uyarı: Açı çok dik, sonuç yakın çıkabilir.";
+        if (isNaN(shortAxis) || isNaN(longAxis) || shortAxis <= 0 || longAxis <= 0 || shortAxis > longAxis) {
+          resultDiv.innerHTML = "<strong>Elips ölçülerini kontrol edin.</strong>";
+          return;
+        }
+
+        const oran = shortAxis / longAxis;
+        const angleRad = Math.asin(Math.min(1, oran));
+        angleDeg = angleRad * 180 / Math.PI;
+        const tanVal = Math.tan(angleRad);
+        mesafe = heightM / tanVal;
+
+        if (angleDeg < 5) yorum = "Uyarı: Açı çok düşük, doğruluk düşebilir.";
+        if (angleDeg > 85) yorum = "Uyarı: Açı çok dik, yukarıdan ateş edilmiş olabilir.";
+        if (silah === 'kales' && angleDeg < 15) mesafe *= 1.2;
+      }
+
       if (mesafe < 0.5) {
-        yorum += " Minimum 0.5 m olarak sabitlendi.";
+        yorum += " Mesafe çok kısa hesaplandı, minimum 0.5 m kabul edildi.";
         mesafe = 0.5;
       }
 
       resultDiv.innerHTML = `
-        <p><strong>Giriş Açısı:</strong> ${angleDeg.toFixed(2)}°</p>
-        <p><strong>İsabet Zeminden Yüksekliği:</strong> ${heightCm} cm</p>
+        ${angleDeg ? `<p><strong>Giriş Açısı:</strong> ${angleDeg.toFixed(2)}°</p>` : ""}
+        <p><strong>İsabet Yüksekliği:</strong> ${heightCm} cm</p>
         <p><strong>Tahmini Yatay Mesafe:</strong> ${mesafe.toFixed(2)} m</p>
+        ${direction ? `<p><strong>Giriş Yönü:</strong> ${direction}</p>` : ""}
         <p>${yorum}</p>
       `;
+
+      const canvas = document.getElementById('grafik');
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      if (angleDeg) {
+        const h = canvas.height - 20;
+        const x = 30;
+        const y = h;
+        const r = 100;
+        const angle = -angleDeg * Math.PI / 180;
+
+        ctx.strokeStyle = '#ffa500';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(x + r * Math.cos(angle), y + r * Math.sin(angle));
+        ctx.stroke();
+
+        ctx.fillStyle = '#fff';
+        ctx.font = '14px sans-serif';
+        ctx.fillText(`Açı: ${angleDeg.toFixed(1)}°`, x + 10, y - 10);
+      }
     }
-  </script>
-</body>
+  </script></body>
 </html>
